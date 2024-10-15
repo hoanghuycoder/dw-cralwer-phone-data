@@ -4,21 +4,22 @@ const fs = require('fs');
 async function getProductDetails(link) {
     const { data } = await axios.get(link);
     const $ = cheerio.load(data);
-    const details = [];
+    const details = {};
 
     // Lấy tên sản phẩm từ thẻ h1
     const productName = $('h1').text().trim();
-    details.push({ name: "Tên sản phẩm", value: productName });
+    details["Tên sản phẩm"] = productName;
 
     // Lấy giá từ thẻ .box-price-present
     const productPrice = $('.box-price-present').text().trim();
-    details.push({ name: "Giá", value: productPrice });
+    details["Giá"] = productPrice;
 
     // Duyệt qua từng phần tử <li> để lấy tên và giá trị
     $('.text-specifi li').each((index, element) => {
         const name = $(element).find('aside:first-child').text().trim();
-        const value = $(element).find('aside:last-child').text().trim();
-        details.push({ name, value });
+        let value = $(element).find('aside:last-child').text().trim();
+        value = value.replace(/\n\s{52}/g, '_');
+        details[name] = value;
     });
 
     return details;
